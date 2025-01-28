@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talha Yılmaz</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/topojson@3"></script>
+  <link rel="icon" href="images/me.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/travel.css">
+  <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-EN41L7PPRG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EN41L7PPRG');
+  </script>
+</head>
+<body>
+  <div id="nav">
+    <h2><a href="./index.html">About Me</a></h2>
+    <h2><a href="./projects.html">Projects</a></h2>
+    <h2><a href="./cv.html">CV</a></h2>
+    <h2><a href="./travel.html">Travel</a></h2>
+  </div> 
+  <main>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="visited-countries" id="visited-countries">
+      <h3>where i've been so far:</h3>
+      <ul id="country-list"></ul>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson-client/3.1.0/topojson.min.js"></script>
+  
+    <script>
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      const projection = d3.geoOrthographic()
+          .scale(Math.min(width, height) / 4 - 3)
+          .translate([width / 2.85 - 140, height / 2.2 - 140])
+          .precision(0.4);
+
+      const path = d3.geoPath(projection);
+
+      const svg = d3.select("main").append("svg")
+          .attr("width", "100%")
+          .attr("height", height / 1.5)
+          .style("background-color", "#f5f5f5");
+
+      const visitedCountries = ["Turkey", "Spain", "Finland", "Estonia", "Sweden", "Latvia"];
+      const countryColors = {
+          visited: "#8fb9f4",
+          unvisited: "#ffffff"
+      };
+
+      const tooltip = d3.select("#tooltip");
+
+      const countryList = d3.select("#country-list");
+      visitedCountries.forEach(country => {
+          const listItem = countryList.append("li");
+          if (country === "Turkey") {
+              listItem.text(`${country} (Homeland)`);
+          } else {
+              listItem.text(country);
+          }
+      });
+
+      d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(world => {
+          const countries = world.objects && world.objects.countries ?
+              topojson.feature(world, world.objects.countries).features : [];
+
+          svg.selectAll("path")
+              .data(countries)
+              .enter()
+              .append("path")
+              .attr("d", path)
+              .attr("fill", d => {
+                  const countryName = d && d.properties ? d.properties.name : "Unknown";
+                  return visitedCountries.includes(countryName) ? countryColors.visited : countryColors.unvisited;
+              })
+              .attr("stroke", "#000")
+              .attr("stroke-width", 0.5)
+              .on("mouseover", (event, d) => {
+                  const countryName = d && d.properties ? d.properties.name : "Unknown";
+                  tooltip.style("display", "block")
+                      .text(countryName);
+              })
+              .on("mousemove", (event) => {
+                  const [mouseX, mouseY] = d3.pointer(event);
+                  tooltip.style("left", (event.clientX + 10) + "px")
+                      .style("top", (event.clientY + 10) + "px");
+              })
+              .on("mouseout", () => {
+                  tooltip.style("display", "none");
+              });
+
+          let rotate = [0, 0, 0];
+          svg.call(
+              d3.drag().on("drag", (event) => {
+                  const { dx, dy } = event;
+                  rotate[0] += dx * 0.25;
+                  rotate[1] -= dy * 0.25;
+                  projection.rotate(rotate);
+                  svg.selectAll("path").attr("d", path);
+              })
+          );
+      });
+
+      window.addEventListener("resize", () => {
+          const newWidth = window.innerWidth;
+          const newHeight = window.innerHeight;
+
+          projection.translate([newWidth / 2 - 50, newHeight / 2 - 50]) 
+                    .scale(Math.min(newWidth, newHeight) / 4 - 3);
+
+          svg.attr("width", "100%").attr("height", newHeight / 1.5); 
+          svg.selectAll("path").attr("d", path);
+      });
+    </script>
+
+    <div>
+      <h1 class="section-header">some memories</h1>
+      <div class="project-grid">
+        <li class="project-wrapper">
+          <h4 class="project-title">Spain</h4>
+          <p class="project-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et mauris eget est faucibus mollis. Morbi dui quam, feugiat id tellus ac, mattis ultricies nisl. Vestibulum at lorem orci. Nulla rhoncus tincidunt sapien, in consequat lectus porta ut. Vivamus nec volutpat risus. Cras dapibus massa suscipit, aliquet elit a, tincidunt mi. In hac habitasse platea dictumst.
+          </p>
+        </li>
+
+        <li class="project-wrapper">
+          <h4 class="project-title">Finland</h4>
+          <p class="project-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et mauris eget est faucibus mollis. Morbi dui quam, feugiat id tellus ac, mattis ultricies nisl. Vestibulum at lorem orci. Nulla rhoncus tincidunt sapien, in consequat lectus porta ut. Vivamus nec volutpat risus. Cras dapibus massa suscipit, aliquet elit a, tincidunt mi. In hac habitasse platea dictumst.
+          </p>
+        </li>
+
+        <li class="project-wrapper">
+          <h4 class="project-title">Estonia</h4>
+          <p class="project-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et mauris eget est faucibus mollis. Morbi dui quam, feugiat id tellus ac, mattis ultricies nisl. Vestibulum at lorem orci. Nulla rhoncus tincidunt sapien, in consequat lectus porta ut. Vivamus nec volutpat risus. Cras dapibus massa suscipit, aliquet elit a, tincidunt mi. In hac habitasse platea dictumst.
+          </p>
+        </li>
+
+        <li class="project-wrapper">
+          <h4 class="project-title">Sweden</h4>
+          <p class="project-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et mauris eget est faucibus mollis. Morbi dui quam, feugiat id tellus ac, mattis ultricies nisl. Vestibulum at lorem orci. Nulla rhoncus tincidunt sapien, in consequat lectus porta ut. Vivamus nec volutpat risus. Cras dapibus massa suscipit, aliquet elit a, tincidunt mi. In hac habitasse platea dictumst.
+          </p>
+        </li>
+
+        <li class="project-wrapper">
+          <h4 class="project-title">Latvia</h4>
+          <p class="project-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et mauris eget est faucibus mollis. Morbi dui quam, feugiat id tellus ac, mattis ultricies nisl. Vestibulum at lorem orci. Nulla rhoncus tincidunt sapien, in consequat lectus porta ut. Vivamus nec volutpat risus. Cras dapibus massa suscipit, aliquet elit a, tincidunt mi. In hac habitasse platea dictumst.
+          </p>
+        </li>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
